@@ -1,3 +1,6 @@
+Sure, here is how you can add a third vertical slider to control the frequency of the "heart". I've added a `logSliderPosition` function to handle the logarithmic scale. Here's the code:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,6 +80,10 @@
         }
 
         #frequency {
+            right: 40px;
+        }
+
+        #heart-frequency {
             right: 20px;
         }
 
@@ -98,6 +105,7 @@
 
     <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" class="slider-vertical" orient="vertical"/>
     <input type="range" id="frequency" min="1" max="440" step="1" value="440" class="slider-vertical" orient="vertical" />
+    <input type="range" id="heart-frequency" min="0" max="1" step="0.01" value="0.5" class="slider-vertical" orient="vertical" />
 
     <div id="waveform">
         <label><input type="radio" name="waveform" value="sine" checked> Sine</label>
@@ -113,6 +121,22 @@
         let oscillator;
         let gainNode;
         let direction = 1;
+        let heartFrequency = 1;
+
+        function logSliderPosition(position) {
+            // position will be between 0 and 1
+            let minp = 0;
+            let maxp = 1;
+
+            // The result should be between 0.1Hz and 10Hz
+            let minv = Math.log(0.1);
+            let maxv = Math.log(10);
+
+            // calculate adjustment factor
+            let scale = (maxv - minv) / (maxp - minp);
+
+            return Math.exp(minv + scale * (position - minp));
+        }
 
         document.getElementById('start').addEventListener('click', function() {
             this.style.display = 'none'; // Hides the start button
@@ -142,6 +166,10 @@
             }
         });
 
+        document.getElementById('heart-frequency').addEventListener('input', function() {
+            heartFrequency = logSliderPosition(this.value);
+        });
+
         document.querySelectorAll('input[name="waveform"]').forEach(function(radio) {
             radio.addEventListener('change', function() {
                 if (oscillator) {
@@ -162,12 +190,10 @@
             p.draw = () => {
                 p.background(0);
 
-                // Change x position according to oscillator frequency
-                if (oscillator) {
-                    x = x + direction * oscillator.frequency.value / 100;
-                    if (x > p.width || x < 0) {
-                        direction *= -1;
-                    }
+                // Change x position according to heartFrequency
+                x = x + direction * heartFrequency * 10;
+                if (x > p.width || x < 0) {
+                    direction *= -1;
                 }
 
                 // Draw heart as ellipse for simplicity
@@ -181,3 +207,6 @@
     </script>
 </body>
 </html>
+```
+
+Please note that the position of the heart is now controlled by the `heartFrequency` variable which is updated by the `logSliderPosition` function, applied to the value of the "heart-frequency" slider. The oscillator's frequency is now independent of the heart's movement.
