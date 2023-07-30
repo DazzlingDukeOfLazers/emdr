@@ -42,30 +42,81 @@
             from { opacity: 1; }
             to   { opacity: 0; }
         }
+
+        #start {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .vertical {
+            position: absolute;
+            width: 20px;
+            height: 80%;
+            top: 10%;
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr; /* IE */
+            transform: rotate(180deg);
+        }
+
+        #volume {
+            left: 20px;
+        }
+
+        #frequency {
+            right: 20px;
+        }
     </style>
 </head>
 <body>
     <p id="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+    <button id="start">Start</button>
     <div id="canvasContainer"></div>
+
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" class="vertical" />
+    <input type="range" id="frequency" min="1" max="20000" step="1" value="440" class="vertical" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js"></script>
     <script>
         // Create audio context and oscillator
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let direction = 1;
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        document.getElementById('start').addEventListener('click', function() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
 
-        oscillator.type = 'sine'; // This can be 'sine', 'square', 'sawtooth', 'triangle'
-        oscillator.frequency.value = 440; // value in hertz
-        oscillator.start();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sine'; // This can be 'sine', 'square', 'sawtooth', 'triangle'
+            oscillator.frequency.value = document.getElementById('frequency').value;
+            gainNode.gain.value = document.getElementById('volume').value;
+            oscillator.start();
+
+            // Hide the start button after the audio starts
+            this.style.display = 'none';
+        });
+
+        document.getElementById('volume').addEventListener('input', function() {
+            if (gainNode) {
+                gainNode.gain.value = this.value;
+            }
+        });
+
+        document.getElementById('frequency').addEventListener('input', function() {
+            if (oscillator) {
+                oscillator.frequency.value = this.value;
+            }
+        });
 
         // Define sketch for p5
         const sketch = (p) => {
-            let x = 0;
-            let y = p.height / 2;
+            let x = p.windowWidth / 2;
+            let y = p.windowHeight / 2;
 
             p.setup = () => {
                 p.createCanvas(p.windowWidth, p.windowHeight);
@@ -75,9 +126,11 @@
                 p.background(0);
 
                 // Change x position according to oscillator frequency
-                x = x + oscillator.frequency.value / 1000;
-                if (x > p.width) {
-                    x = 0;
+                if (oscillator) {
+                    x = x + direction * oscillator.frequency.value / 10000;
+                    if (x > p.width || x < 0) {
+                        direction *= -1;
+                    }
                 }
 
                 // Draw heart as ellipse for simplicity
