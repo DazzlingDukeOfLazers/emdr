@@ -115,6 +115,8 @@
         let direction = 1;
 
         document.getElementById('start').addEventListener('click', function() {
+            this.style.display = 'none'; // Hides the start button
+
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             oscillator = audioContext.createOscillator();
             gainNode = audioContext.createGain();
@@ -162,7 +164,7 @@
 
                 // Change x position according to oscillator frequency
                 if (oscillator) {
-                    x = x + direction * oscillator.frequency.value / 10000;
+                    x = x + direction * oscillator.frequency.value / 100;
                     if (x > p.width || x < 0) {
                         direction *= -1;
                     }
