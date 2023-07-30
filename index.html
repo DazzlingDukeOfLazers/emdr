@@ -1,6 +1,3 @@
-Absolutely! To invert both of the sliders, we can adjust the `rotate` transformation from `180deg` to `270deg`. This will make the sliders go from top (min) to bottom (max). As for the frequency, we can simply adjust the `max` attribute of the `frequency` input to `440`. Here is the updated code:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,14 +49,27 @@ Absolutely! To invert both of the sliders, we can adjust the `rotate` transforma
             transform: translateX(-50%);
         }
 
-        .vertical {
+        .slider-vertical {
             position: absolute;
-            width: 20px;
+            width: 10px;
             height: 80%;
             top: 10%;
             -webkit-appearance: slider-vertical;
-            writing-mode: bt-lr; /* IE */
-            transform: rotate(270deg);
+        }
+
+        .slider-vertical::-webkit-slider-thumb {
+            -webkit-appearance: none;
+        }
+
+        .slider-vertical::-webkit-slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+        }
+
+        .slider-vertical::-webkit-slider-runnable-track {
+            width: 10px;
+            background: #000000;
         }
 
         #volume {
@@ -76,8 +86,8 @@ Absolutely! To invert both of the sliders, we can adjust the `rotate` transforma
     <button id="start">Start</button>
     <div id="canvasContainer"></div>
 
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" class="vertical" />
-    <input type="range" id="frequency" min="1" max="440" step="1" value="440" class="vertical" />
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" class="slider-vertical" orient="vertical"/>
+    <input type="range" id="frequency" min="1" max="440" step="1" value="440" class="slider-vertical" orient="vertical" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js"></script>
     <script>
@@ -147,4 +157,3 @@ Absolutely! To invert both of the sliders, we can adjust the `rotate` transforma
     </script>
 </body>
 </html>
-```
