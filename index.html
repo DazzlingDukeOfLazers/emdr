@@ -19,7 +19,7 @@
     <body>
         <button id="startButton">Start</button>
         <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.2" orient="vertical">
-        <input type="range" id="frequencySlider" min="0" max="1" step="0.01" value="0.5" orient="vertical">
+        <input type="range" id="frequencySlider" min="1" max="440" step="1" value="220" orient="vertical">
         <input type="range" id="heartRateSlider" min="0" max="1" step="0.01" value="0.5" orient="vertical">
         <div id="oscillatorTypeContainer">
             <input type="radio" id="sine" name="oscillatorType" value="sine" checked>
@@ -34,22 +34,12 @@
         <script>
             let scene, camera, renderer;
             let geometry, material, mesh;
-            let targetX = 0, direction = 1;
+            let targetX = 0, direction = 0.1;
             let heartFrequency = 1;
             let frequencySlider, volumeSlider, heartRateSlider;
-            let oscillator, gainNode, audioContext;
+            let oscillator, gainNode, audioContext, panner;
             let oscillatorTypes = ['sine', 'square', 'sawtooth', 'triangle'];
             let currentOscillatorType = 0;
-
-            function logSliderPosition(position, minv, maxv) {
-                var minp = 0;
-                var maxp = 1;
-                var scale = (maxv-minv) / (maxp-minp);
-                return Math.exp(minv + scale*(position-minp));
-            }
-
-            init();
-            animate();
 
             function init() {
                 scene = new THREE.Scene();
@@ -76,20 +66,22 @@
                 }, false);
 
                 frequencySlider.addEventListener("input", function() {
-                    oscillator.frequency.value = logSliderPosition(this.value, Math.log(1), Math.log(440));
+                    oscillator.frequency.value = this.value;
                 }, false);
 
                 heartRateSlider.addEventListener("input", function() {
-                    heartFrequency = logSliderPosition(this.value, Math.log(1), Math.log(100));
+                    heartFrequency = this.value * 10;
                 }, false);
 
                 document.querySelector("#startButton").addEventListener("click", function() {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     oscillator = audioContext.createOscillator();
                     gainNode = audioContext.createGain();
+                    panner = audioContext.createStereoPanner();
 
                     oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                    gainNode.connect(panner);
+                    panner.connect(audioContext.destination);
 
                     oscillator.type = oscillatorTypes[currentOscillatorType];
                     oscillator.frequency.value = 440;
@@ -113,17 +105,21 @@
             function animate() {
                 requestAnimationFrame( animate );
 
-                targetX += direction * heartFrequency * 0.01;
+                targetX += direction * heartFrequency;
 
                 if(targetX > 4) {
-                    direction = -1;
+                    direction = -0.1;
                 } else if(targetX < -4) {
-                    direction = 1;
+                    direction = 0.1;
                 }
 
                 mesh.position.x = targetX;
+                panner.pan.value = targetX / 4;
                 renderer.render( scene, camera );
             }
+
+            init();
+            animate();
         </script>
     </body>
 </html>
