@@ -6,10 +6,11 @@
             body { margin: 0; }
             canvas { display: block; }
             #startButton { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-            #frequencySlider, #volumeSlider, #heartRateSlider { position: absolute; width: 30px; height: 80%; orientation: vertical; }
+            #frequencySlider, #volumeSlider, #heartRateSlider { position: absolute; width: 30px; height: 80%; writing-mode: bt-lr; -webkit-appearance: slider-vertical; }
             #frequencySlider { top: 10%; right: 10%; }
             #volumeSlider { top: 10%; right: 5%; }
             #heartRateSlider { top: 10%; right: 15%; }
+            #oscillatorTypeContainer { position: absolute; top: 90%; left: 10%; }
         </style>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script src="https://threejs.org/build/three.js"></script>
@@ -20,11 +21,21 @@
         <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.2" orient="vertical">
         <input type="range" id="frequencySlider" min="0" max="1" step="0.01" value="0.5" orient="vertical">
         <input type="range" id="heartRateSlider" min="0" max="1" step="0.01" value="0.5" orient="vertical">
+        <div id="oscillatorTypeContainer">
+            <input type="radio" id="sine" name="oscillatorType" value="sine" checked>
+            <label for="sine">Sine</label>
+            <input type="radio" id="square" name="oscillatorType" value="square">
+            <label for="square">Square</label>
+            <input type="radio" id="sawtooth" name="oscillatorType" value="sawtooth">
+            <label for="sawtooth">Sawtooth</label>
+            <input type="radio" id="triangle" name="oscillatorType" value="triangle">
+            <label for="triangle">Triangle</label>
+        </div>
         <script>
             let scene, camera, renderer;
             let geometry, material, mesh;
             let targetX = 0, direction = 1;
-            let heartFrequency = 0.1;
+            let heartFrequency = 1;
             let frequencySlider, volumeSlider, heartRateSlider;
             let oscillator, gainNode, audioContext;
             let oscillatorTypes = ['sine', 'square', 'sawtooth', 'triangle'];
@@ -69,7 +80,7 @@
                 }, false);
 
                 heartRateSlider.addEventListener("input", function() {
-                    heartFrequency = logSliderPosition(this.value, Math.log(0.1), Math.log(10));
+                    heartFrequency = logSliderPosition(this.value, Math.log(1), Math.log(100));
                 }, false);
 
                 document.querySelector("#startButton").addEventListener("click", function() {
@@ -88,6 +99,15 @@
 
                     this.style.display = 'none';
                 }, false);
+
+                let oscillatorTypeInputs = document.querySelectorAll('input[name="oscillatorType"]');
+                oscillatorTypeInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        if (this.checked) {
+                            oscillator.type = this.value;
+                        }
+                    });
+                });
             }
 
             function animate() {
@@ -102,7 +122,6 @@
                 }
 
                 mesh.position.x = targetX;
-
                 renderer.render( scene, camera );
             }
         </script>
