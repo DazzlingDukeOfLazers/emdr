@@ -1,6 +1,3 @@
-Sure, here is how you can add a third vertical slider to control the frequency of the "heart". I've added a `logSliderPosition` function to handle the logarithmic scale. Here's the code:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,6 +119,8 @@ Sure, here is how you can add a third vertical slider to control the frequency o
         let gainNode;
         let direction = 1;
         let heartFrequency = 1;
+        let x = 0;
+        let easing = 0.05;
 
         function logSliderPosition(position) {
             // position will be between 0 and 1
@@ -180,7 +179,6 @@ Sure, here is how you can add a third vertical slider to control the frequency o
 
         // Define sketch for p5
         const sketch = (p) => {
-            let x = p.windowWidth / 2;
             let y = p.windowHeight / 2;
 
             p.setup = () => {
@@ -189,24 +187,23 @@ Sure, here is how you can add a third vertical slider to control the frequency o
 
             p.draw = () => {
                 p.background(0);
-
-                // Change x position according to heartFrequency
-                x = x + direction * heartFrequency * 10;
-                if (x > p.width || x < 0) {
+    
+                // Calculate target x position
+                let targetX = x + direction * heartFrequency * 10;
+                if (targetX > p.width || targetX < 0) {
                     direction *= -1;
                 }
 
-                // Draw heart as ellipse for simplicity
+                // Calculate x position with lerp
+                x = p.lerp(x, targetX, easing);
+    
+                // Draw heart as ellipse
                 p.fill(255, 0, 0);
                 p.ellipse(x, y, 50, 50);
             }
         }
 
-        // Create p5
-        new p5(sketch, 'canvasContainer');
+        new p5(sketch, document.getElementById('canvasContainer'));
     </script>
 </body>
 </html>
-```
-
-Please note that the position of the heart is now controlled by the `heartFrequency` variable which is updated by the `logSliderPosition` function, applied to the value of the "heart-frequency" slider. The oscillator's frequency is now independent of the heart's movement.
