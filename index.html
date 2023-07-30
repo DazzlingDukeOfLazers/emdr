@@ -74,6 +74,7 @@
                 }, false);
 
                 document.querySelector("#startButton").addEventListener("click", function() {
+                    this.style.display = "none";
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     oscillator = audioContext.createOscillator();
                     gainNode = audioContext.createGain();
@@ -83,21 +84,18 @@
                     gainNode.connect(panner);
                     panner.connect(audioContext.destination);
 
-                    oscillator.type = oscillatorTypes[currentOscillatorType];
-                    oscillator.frequency.value = 440;
+                    oscillator.type = "sine";
+                    oscillator.frequency.value = 220;
                     gainNode.gain.value = 0.2;
 
                     oscillator.start();
 
-                    this.style.display = 'none';
-                }, false);
+                    let oscillatorTypeInputs = document.querySelectorAll('input[name="oscillatorType"]');
 
-                let oscillatorTypeInputs = document.querySelectorAll('input[name="oscillatorType"]');
-                oscillatorTypeInputs.forEach(input => {
-                    input.addEventListener('change', function() {
-                        if (this.checked) {
-                            oscillator.type = this.value;
-                        }
+                    oscillatorTypeInputs.forEach((input) => {
+                        input.addEventListener('change', () => {
+                            oscillator.type = input.value;
+                        });
                     });
                 });
             }
@@ -114,7 +112,8 @@
                 }
 
                 mesh.position.x = targetX;
-                panner.pan.value = targetX / 4;
+                panner.pan.value = Math.max(-1, Math.min(1, 2 * (targetX / 4)));
+                gainNode.gain.value = volumeSlider.value * (0.2 + 0.8 * Math.abs(targetX / 4));
                 renderer.render( scene, camera );
             }
 
