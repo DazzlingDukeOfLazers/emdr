@@ -126,9 +126,6 @@
             oscillator.frequency.value = document.getElementById('frequency').value;
             gainNode.gain.value = document.getElementById('volume').value;
             oscillator.start();
-
-            // Hide the start button after the audio starts
-            this.style.display = 'none';
         });
 
         document.getElementById('volume').addEventListener('input', function() {
@@ -178,3 +175,7 @@
         }
 
         // Create p5
+        new p5(sketch, 'canvasContainer');
+    </script>
+</body>
+</html>
